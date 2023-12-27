@@ -50,14 +50,14 @@ library(caret)
 -  Updated dataset to only include the variables used
 -  Determine and remove outliers from data frame using quantile function within 3 standard deviations of each end of the distribution, using 99.85%       and 0.15% of the upper and lower bounds of each variable
 -  Box plot visualization of outliers within the data
-![ creenshot 2023-12-27 at 4 12 57 PM] ("https://github.com/Navy-Neang/R-programming-project/assets/154766577/7537db7b-eb5e-4d24-acdf-11c90d07e46b">)
-<!-- If you have screenshots you'd like to share, include them here. -->
+
+<img width="617" alt="Screenshot 2023-12-27 at 4 12 57 PM" src="https://github.com/Navy-Neang/R-programming-project/assets/154766577/7537db7b-eb5e-4d24-acdf-11c90d07e46b">
 
 
-## Setup
-What are the project requirements/dependencies? Where are they listed? A requirements.txt or a Pipfile.lock file perhaps? Where is it located?
 
-Proceed to describe how to install / setup one's local environment / get started with the project.
+## Data Distribution
+- Exploratory analyses (for each variable) doing appropriate visualizations with ggplot2
+- 
 
 
 ## Usage
