@@ -1,4 +1,4 @@
-# PREDICTORS FOR PHYSICAL HEALTH
+# PREDICTORS FOR POOR PHYSICAL HEALTH
 > Determining if various predictors contribute to poor physical health utlizing R. 
 
 
