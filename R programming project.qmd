@@ -1,0 +1,253 @@
+
+
+### Instructions
+ You will choose one of those four variables as the response variable and the other three as predictors.
+
+------------------------------------------------------------------------
+
+### Data Set
+
+-   These data come from [Kaggle](https://www.kaggle.com/cdc/behavioral-risk-factor-surveillance-system).
+
+------------------------------------------------------------------------
+
+### Preliminaries
+
+```{r}
+### It's always a good idea when working in RStudio to start with a clean environment. 
+### Clear objects from the environment memory that may be leftover from previous 
+###   versions of your code or other assignments by running the following line:
+rm(list = ls())
+
+### Load the libraries you need
+
+library(tidyverse) 
+library(caret)
+
+
+
+### Load the Data
+### Load the data file
+brf <- read_csv("BRFSS2015_650.csv")
+
+```
+
+------------------------------------------------------------------------
+
+## Questions
+
+------------------------------------------------------------------------
+
+### Q10
+
+Address the values of each of the variables (use the codebook for this and include your answer as comments). For instance, is "none" equal to a value other than 0? Are there extra decimals implied? Are there other values that should be excluded based on the responses they represent? Which variable will you seek to predict from the other variables? Explain in your comments. Update the dataset you will use for the remainder of the problems to account for these values.
+
+```{r}
+### Do not edit the following line. It is used by CodeGrade.
+# CG Q10 # 
+
+#The 4 different variable I chose to look at are PHYSHLTH, ALCDAY5, SMOKE100 and CVDSTRK3. I chose PHYSHLTH as the response using the other 3 variables as the predictors because all those factors do contribute to the physical health of an individual. 
+
+#I want to know if respondents experienced poor phsysical health and for how many days that experience it for in the past 30 days based on the whether they have smoke 100 cigarettes in their entire life, the number of days they drank in the last 30 days and whether or not they have ever had a stroke. 
+
+#PHYSHLTH - Now thinking about your physical health, which includes physical illness and injury, for how many days during the past
+#30 days was your physical health not good?
+  #This is the response response variable in which the other three variables can be used to predict its outcome. The data set will be filtered from c(1:30) since we want to know if the other varialbes leads of poor physical health for at least one day.  The value 88 represent zero number of days of being physically ill, but it will be excluded along with the other values. 
+  
+#ALCDAY5 - During the past 30 days, how many days per week or per month did you have at least one drink of any alcoholic
+#beverage such as beer, wine, a malt beverage or liquor?
+  #This is one of the predictor variable that will be used to predictor the number of days, if any, the respondent experienced poor health and the number of days they experienced poor health from consumption of alcohol. Since the response variable is looking at the number of days in the past month, the dataset will be filtered as c(201:299). The 888 value represent zero number of days of alcohol consumption, but since we want to determine if there is an effect of alcohol drank in the past month affects physical health. All other values will be excluded because we only want to determine if the number of days of alcohol consumption affects physical health and for how long in terms of the number of days. 
+
+#SMOKE100 - Have you smoked at least 100 cigarettes in your entire life? [Note: 5 packs = 100 cigarettes]
+  #This is another one of the predictor for poor health. We want to determine if the respondent that experienced poor health is correlated to those that have smoked 100 cigarettes in their entire life. The data set will be filtered as SMOKE100 == 1 for those that have  while excluded the rest of the values. 
+  
+#CVDSTRK3 - (Ever told) you had a stroke.
+  #This is the last variable used to predict for poor health and the number of days poor health was experienced. We want to determine if people who had a stroke before experience poor health and the number of days they experienced it for. Thus, this dataset will be filtered as CVDSTRK3 == 1 to only represent those that have ever had a stroke. 
+
+
+
+
+
+### TYPE YOUR CODE BELOW ###
+
+Q10 <- brf |>
+  filter(PHYSHLTH %in% c(1:30), ALCDAY5 %in% c(201:299), SMOKE100 %in% c(1:2), CVDSTRK3 %in% c(1:2) ) |>
+  as.data.frame()
+
+
+### VIEW OUTPUT ###
+Q10
+
+
+
+
+
+```
+
+### Q11
+
+Remove any outliers for each applicable variable. Make sure you are updating the dataset from Q10 and using this dataset for the remainder of the problems. Briefly explain why you chose the method you used. Make sure to comment it out.
+
+```{r}
+### Do not edit the following line. It is used by CodeGrade.
+# CG Q11 # 
+
+### TYPE YOUR CODE BELOW ###
+
+#I chose to not remove any outliers from the dataset since I have already filtered out all the values that should be excluded. Even though I chose to not remove any outliers, I still used the quantile function to determine if there are any outliers within 3 standard deviations of each end of the distribution, thus I used 99.85%  and 0.15% to see if there are any outliers should of the upper and lower bounds of each variable. I also used the box plot to visually see if there are any outliers within the data. 
+
+#Q11b: From this quantile function to determine the outliers for PHYSHLTH, there does not seem to be any outliers for this variable. The box plot also shows that there are no outliers. 
+
+PHYSHLTH_upper <- quantile(Q10$PHYSHLTH, 0.9985, na.rm = TRUE)
+PHYSHLTH_lower <- quantile(Q10$PHYSHLTH, 0.0015, na.rm = TRUE)
+Q10_out_PHYSHLTH <- which(Q10$PHYSHLTH > PHYSHLTH_upper | Q10$PHYSHLTH < PHYSHLTH_lower)
+
+ggplot(Q10) +
+  geom_boxplot(mapping = aes(PHYSHLTH))
+
+#Q11b: From this quantile function to determine the outliers for ALCDAY5, there does not seem to be any outliers for this variable. All the values are within the upper and lower quanitle. However, the box plot does show some outliers, more so in 23 to 30 number of days alcohol was consumed in the last 30 days. The data is concentrated within the 2-10 days in the last 30 days.  Although there are outliers in this variable, I decided not to excluded them because I want to include all the values within the 3 standard deviation at each end of the tails.
+
+ALCDAY5_upper <- quantile(Q10$ALCDAY5, 0.9985, na.rm = TRUE)
+ALCDAY5_lower <- quantile(Q10$ALCDAY5, 0.0015, na.rm = TRUE)
+Q10_out_ALCDAY5 <- which(Q10$ALCDAY5 > ALCDAY5_upper | Q10$ALCDAY5 < ALCDAY5_lower)
+
+ggplot(Q10) +
+  geom_boxplot(mapping = aes(ALCDAY5))
+
+
+#Q11c: From this quantile function to determine the outliers for SMOKE100, there does not seem to be any outliers for this variable.The box plot confirms that there are no outliers. This graph is showing the way it is because the number of people who have and those that have not smoked 100 cigarettes in their entire life are almost in equal proportion. 
+
+SMOKE100_upper <- quantile(Q10$SMOKE100, 0.9985, na.rm = TRUE)
+SMOKE100_lower <- quantile(Q10$SMOKE100, 0.0015, na.rm = TRUE)
+Q10_out_SMOKE100 <- which(Q10$SMOKE100 > SMOKE100_upper | Q10$SMOKE100 < SMOKE100_lower)
+
+ggplot(Q10) +
+  geom_boxplot(mapping = aes(SMOKE100))
+
+#Q11c: From this quantile function to determine the outliers for CVDSTRK3, there does not seem to be any outliers for this variable.All the values are within the 99.98% and 0.15% percentile. However, the box plot does show that there is an outlier for those that have suffered a stroke. Again, I decided to not exclude the outliers since they are within the range. 
+
+CVDSTRK3_upper <- quantile(Q10$CVDSTRK3, 0.9985, na.rm = TRUE)
+CVDSTRK3_lower <- quantile(Q10$CVDSTRK3, 0.0015, na.rm = TRUE)
+Q10_out_CVDSTRK3<- which(Q10$CVDSTRK3 > CVDSTRK3_upper | Q10$CVDSTRK3 < CVDSTRK3_lower)
+
+ggplot(Q10) +
+  geom_boxplot(mapping = aes(CVDSTRK3))
+ 
+
+```
+
+### Q12
+
+Complete exploratory analyses (for each variable) doing appropriate visualizations with ggplot2. Provide a discussion of your observations with comments
+
+```{r}
+### Do not edit the following line. It is used by CodeGrade.
+# CG Q12 # 
+
+### TYPE YOUR CODE BELOW ###
+
+#Q12a: I chose to use the histogram distribution because I want to see the spread of the data within the dataframe that it was filtered for, which is for the number of days respondent experienced physical pain in the last 30 days. The graph shows that most people experienced 1 day of pain in the last 30 days, followed by 30 days of pain. There seems to be a trend of people experiencing of 1-5 days of poor physical health. 
+
+ggplot(Q10) +
+  geom_histogram(mapping = aes(PHYSHLTH)) 
+
+
+#Q12b: I chose to use the frequency distribution to represent the number of days respondents drank in the last month. The graph shows that most people drank once in the last 30 days. After the one day, there is a decline, meaning that there are people who do drink more than once in the last month but in less frequency. There seems to be a little spike of people who drank 10, 15, and 20 days in the last month. There are quite a number of people who drank everyday in the past month.  
+
+ggplot(data = Q10) +
+  geom_freqpoly(mapping = aes(x = ALCDAY5))      
+
+#Q12c: I chose to use the bar graph to compare the 2 different category of people who smoke 100 cigarettes in their entire life. Since there are only 2 different distribution, I thought it would be easier to visually compare the 2 different demographics. The graph shows that it is pretty equal distribution of people who have smoked 100 cigarettes in their entire life an those who don't. However, there is a slight highter number of people who have not smoked 100 cigarettes in their entire life. 
+
+ggplot(data = Q10) +
+  geom_bar(mapping = aes(SMOKE100))
+
+
+
+#Q12d: I also chose to use the bar graph to show the difference of those who have and those who have not had a stoke for the same reason as the variable SMOKE100. It is easier to visualize the difference between the two categories. The graph show that there are a lot more people who have not had a stroke compared to those who have. 
+
+ggplot(Q10) +
+  geom_bar(mapping = aes(CVDSTRK3))
+
+
+
+
+```
+
+### Q13
+
+Run basic descriptive statistics. Be sure to address each variable. What do these statistics reveal? Be sure to comment it out.
+
+```{r}
+### Do not edit the following line. It is used by CodeGrade.
+# CG Q13 # 
+
+### TYPE YOUR CODE BELOW ###
+
+#Q13_PHYSHLTH basic descriptive statistics. The variance of this variable is quite high. This tells us that the data is pretty spread out. This finding in the variance is in agreement with the histogram of this variable. You see that the data is spread out across the range of the dataset. The SD is low, which means that the data are clustered tightly around the mean. 
+
+Q13_PHYSHLTH_mean <- round(mean(Q10$PHYSHLTH))
+Q13_PHYSHLTH_median <- round(median(Q10$PHYSHLTH))
+Q13_PHYSHLTH_mode <- mode(Q10$PHYSHLTH)
+Q13_PHYSHLTH_range <- range(Q10$PHYSHLTH)
+Q13_PHYSHLTH_var <- round(var(Q10$PHYSHLTH))
+Q13_PHYSHLTH_sd <- round(sd(Q10$PHYSHLTH))
+
+
+#Q13_ALCDAY5 basic descriptive statistics. The variance of this variable is quite high. This tells us that the data is pretty spread out. This finding in the variance is in agreement with the histogram of this variable. You see that the data is spread out across the range of the dataset. The SD is low, which means that the data are clustered tightly around the mean. 
+
+Q13_ALCDAY5_mean <- round(mean(Q10$ALCDAY5))
+Q13_ALCDAY5_median <- round(median(Q10$ALCDAY5))
+Q13_ALCDAY5_mode <- mode(Q10$ALCDAY5)
+Q13_ALCDAY5_range <- range(Q10$ALCDAY5)
+Q13_ALCDAY5_var <- round(var(Q10$ALCDAY5))
+Q13_ALCDAY5_sd <- round(sd(Q10$ALCDAY5))
+
+#Q13_SMOKE100 basic descriptive statistics. The variance and SD are both zero, which means that there is essentially there is no spread of the data set and that it is located very tightly around the mean. Since the distribution of those who have and those who havent smoked 100 cigarettes in their entire lives are almost the same, the basic descriptive statistics tells us that there is slightly higher number of those people who have not smoked 100 cigarettes. 
+
+Q13_SMOKE100_mean <- round(mean(Q10$SMOKE100))
+Q13_SMOKE100_median <- round(median(Q10$SMOKE100))
+Q13_SMOKE100_mode <- mode(Q10$SMOKE100)
+Q13_SMOKE100_range <- range(Q10$SMOKE100)
+Q13_SMOKE100_var <- round(var(Q10$SMOKE100))
+Q13_SMOKE100_sd <- round(sd(Q10$SMOKE100))
+
+#Q13_CVDSTRK3 basic descriptive statistics. The variance and SD are both zero, which means that there is essentially there is no spread of the data set and that it is located very tightly around the mean. This means sense since we see that the majority if not all of the respondents did not suffered from a stroke. 
+
+Q13_CVDSTRK3_mean <- round(mean(Q10$CVDSTRK3))
+Q13_CVDSTRK3_median <- round(median(Q10$CVDSTRK3))
+Q13_CVDSTRK3_mode <- mode(Q10$CVDSTRK3)
+Q13_CVDSTRK3_range <- range(Q10$CVDSTRK3)
+Q13_CVDSTRK3_var <- round(var(Q10$CVDSTRK3))
+Q13_CVDSTRK3_sd <- round(sd(Q10$CVDSTRK3))                     
+
+
+```
+
+### Q14
+
+Finally, run at least 2 different, appropriate regressions predicting the variable you indicated in Q10. These regressions should use different predictor(s). Identify the best model and provide a discussion of your observations. Be sure to comment it out.
+
+```{r}
+### Do not edit the following line. It is used by CodeGrade.
+# CG Q14 # 
+
+### TYPE YOUR CODE BELOW ###
+
+#Q14a: I used CVDSTRK3 and SMOKE100 to predict the number of days respondents experienced poor physical health. The variables was inputted as factors since the variables have two categories. The linear regression indicates that there is a positive correlation between the number of days physical health was affected by whether or not the respondent ever suffered from a stroke and those who have and haven't smoked 100 cigarettes in their entire lives. I then calculated the AIC that will be used to compare the fit of this regression model vs the other one. The model parameter (K) was set to 4 since it is 2 plus the number of predictors. AIC is used to find the model that explains the most variation  in the data, while penalizing the models that use excessive number of parameters. 
+
+model1 <- lm(PHYSHLTH ~ as.factor(CVDSTRK3) + as.factor(SMOKE100), data = Q10)
+summary(model1)
+Q14a <- AIC(model1, k=4)
+
+
+#Q14b:I ran another regression model using SMOKE100 to predict the number of days respondent experienced poor physical health. I also used the variable as factors since it also has two categories. Like in model one, this model also show a positive correlation. The AIC was also calculated to compare this model with the one earlier. The K value was set to 3 because only 1 variable was used. The lower the AIC value, the better the model fits. 
+
+model2 <- lm(PHYSHLTH ~ as.factor(SMOKE100), data = Q10)
+summary(model2)
+Q14b <- AIC(model2, k=3)
+
+#Q14c: After running the regressions, the AIC values indicate that model1 is a better model since it is lower than model2. This means that model1 explains for the variation within the dataset when predicting the number of days of poor physical health and a better model for predicting the number of days of poor physical health.  
+```
+
+
