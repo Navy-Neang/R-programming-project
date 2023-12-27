@@ -16,7 +16,7 @@
 
 ## Objective
 - Using the behavioral-risk-factor-surveillance-system from the CDC, we want to address the following questions. 
-- Do respondents experienced poor phsysical health and how many days they experience it for in the past 30 days based on the whether they have smoke 100 cigarettes in their entire life, the number of days they drank in the last 30 days and whether or not they have ever had a stroke?
+- Do respondents experienced poor phsysical health and how many days they experience it for in the past 30 days based on the whether they have smokeD 100 cigarettes in their entire life, the number of days they drank in the last 30 days and whether or not they have ever had a stroke?
 - Determine which predictor or combination of predictors (model) is the better model to predict physical health. The choosen predictors used for this project are ALCDAY5, SMOKE100 and CVDSTRK3 for PHYSHLTH.
 
 
